@@ -1,0 +1,35 @@
+# Node.js
+node_modules/
+
+# Build artifacts
+dist/
+build/
+
+# Editor and IDE specific files
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Compiled output and caches
+*.log
+*.bak
+*.lock
+
+# Mac and Windows system files
+.DS_Store
+Thumbs.db
+
+# Dependency lock files
+yarn.lock
+package-lock.json
+
+# Environment-specific config files
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Compiled TypeScript files
+*.js
+*.js.map
