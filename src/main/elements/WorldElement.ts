@@ -3,6 +3,7 @@ import { ElementType } from "./ElementType";
 import Vector2 from "../geometry/Vector2";
 import World from "../world/World";
 import Renderer from "../renderer/Renderer";
+import VectorDirection from "../world/VectorDirection";
 
 abstract class WorldElement {
     protected world: World;
@@ -10,9 +11,50 @@ abstract class WorldElement {
     protected color: string;
     protected density: number;
     protected type: ElementType;
-    protected size: number = 3;
+    protected stationary: boolean = false; // determines if the element was stationary during the last update
 
     abstract update(): void;
+
+    protected tryToMove(direction: Vector2): boolean {
+        // Try to move the element in the given direction
+        // Returns true if the move was successful, false otherwise
+        const newPosition = this.position.add(direction);
+        if (!this.world.isOutOfBounds(newPosition) && this.world.isEmptyAt(newPosition)) {
+            this.world.updateElementPosition(this, newPosition.x, newPosition.y);
+            return true;
+        }
+        return false;
+    }
+
+    gravity(): void {
+        if (this.stationary) {
+            return;
+        }
+
+        // Implements base basic gravity
+
+        // Try to "move down" if possible
+        if (this.tryToMove(VectorDirection.DOWN)) {
+            return;
+        }
+
+        // If not, pick randomly between down left and down right and try to move there
+        const randomDirection = Math.random() > 0.5 ? VectorDirection.DOWN_LEFT : VectorDirection.DOWN_RIGHT;
+        const otherDirection = randomDirection === VectorDirection.DOWN_LEFT ? VectorDirection.DOWN_RIGHT : VectorDirection.DOWN_LEFT;
+
+        if (this.tryToMove(randomDirection)) {
+            return;
+        }
+
+
+        // otherwise pick the "other" direction and attempt to move the
+        if (this.tryToMove(otherDirection)) {
+            return;
+        }
+
+        // finally mark the element as was updated
+        this.stationary = true;
+    }
 
     draw(): void {
         // Get the renderer and draw itself on the canvas
@@ -20,11 +62,18 @@ abstract class WorldElement {
         const context: CanvasRenderingContext2D = renderer.getDrawingContext();
 
         context.fillStyle = this.color;
+
+        if (this.stationary) {
+            context.fillStyle = 'red';
+        } else {
+            context.fillStyle = 'green';
+        }
+
         context.fillRect(
-            this.position.x,
-            this.position.y,
-            this.size,
-            this.size
+            this.position.x * this.world.getScale(),
+            this.position.y * this.world.getScale(),
+            this.world.getScale(),
+            this.world.getScale()
         );
     }
 
@@ -42,6 +91,10 @@ abstract class WorldElement {
 
     getPosition(): Vector2 {
         return this.position;
+    }
+
+    getIsStationary(): boolean {
+        return this.stationary;
     }
 
     toString(): string {

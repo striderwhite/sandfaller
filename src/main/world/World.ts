@@ -10,15 +10,18 @@ class World {
     // Represents a spatial lookup table for WorldElements
     protected grid: (WorldElement|null)[][];
 
-    constructor(width: number, height: number) {
-        this.grid = new Array(height);
-        for (let i = 0; i < height; i++) {
-            this.grid[i] = new Array(width);
+    protected scale: number; // the scaling factor for the world
+
+    constructor(width: number, height: number, scale: number = 1) {
+        this.scale = scale;
+        this.grid = new Array(height/scale);
+        for (let i = 0; i < height/scale; i++) {
+            this.grid[i] = new Array(width/scale);
         }
     }
 
     update() {
-        this.elements.forEach(element => {
+        this.elements.filter(elm => !elm.getIsStationary()).forEach(element => {
             element.update();
         });
     }
@@ -54,14 +57,15 @@ class World {
         this.elements.push(element);
         this.grid[y][x] = element;
         // update the element's underlying position
-        element.setPosition({x, y});
+        element.setPosition(new Vector2(x, y));
     }
 
     updateElementPosition(element: WorldElement, x: number, y: number): void {
+        // update on the grid
         this.grid[element.getPosition().y][element.getPosition().x] = null;
         this.grid[y][x] = element;
         // update the element's underlying position
-        element.setPosition({x, y});
+        element.setPosition(new Vector2(x, y));
     }
 
     destroyElement(element: WorldElement): void {
@@ -90,12 +94,20 @@ class World {
         return !this.grid[position.y][position.x];
     }
 
+    isOutOfBounds(position: Vector2) {
+        return position.x < 0 || position.x >= this.getWidth() || position.y < 0 || position.y >= this.getHeight();
+    }
+
     getWidth(): number {
         return this.grid[0].length;
     }
 
     getHeight(): number {
         return this.grid.length;
+    }
+
+    getScale(): number {
+        return this.scale;
     }
 
     getNeighborAtDirection(element: WorldElement, direction: Direction) {

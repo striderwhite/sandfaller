@@ -8,3 +8,5 @@ export enum Direction {
     SOUTH_EAST,
     SOUTH_WEST
 }
+
+export default Direction;
