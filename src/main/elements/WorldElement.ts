@@ -10,7 +10,7 @@ abstract class WorldElement {
     protected color: string;
     protected density: number;
     protected type: ElementType;
-    protected size: number = 5;
+    protected size: number = 3;
 
     abstract update(): void;
 

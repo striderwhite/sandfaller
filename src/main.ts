@@ -2,7 +2,7 @@ import Renderer from './main/renderer/Renderer';
 import World from './main/world/World';
 
 // World constants
-const worldWidth = 500;
+const worldWidth = 1000;
 const worldHeight = 500;
 
 // Initial setup of the game world
@@ -17,7 +17,7 @@ const context = Renderer.getRenderer().getDrawingContext();
 
 
 // Define the target FPS and the time interval per frame
-const targetFPS = 60;
+const targetFPS = 120;
 const targetFrameInterval = 1000 / targetFPS;
 
 // Start the game loop
@@ -67,7 +67,7 @@ if (generateSandButton) {
 }
 
 function generateRandomElements() {
-    for (let i = 0; i < 100; i++) {
+    for (let i = 0; i < 1000; i++) {
         world.createRandomElement();
     }
 }
