@@ -1,69 +1,73 @@
-import { OrthographicCamera, Scene, Vector2, WebGLRenderer } from 'three';
-import World from './main/world';
+import Renderer from './main/renderer/Renderer';
+import World from './main/world/World';
 
-// Define canvas size
-const canvasSize = new Vector2(500, 500);
+// World constants
+const worldWidth = 500;
+const worldHeight = 500;
 
-// Define grid dimensions
-const gridRows = 10;
-const gridCols = 10;
+// Initial setup of the game world
+const world = new World(worldWidth, worldHeight);
 
-// Calculate cell size
-const cellSize = Math.min(canvasSize.x / gridCols, canvasSize.y / gridRows);
+// Draw the initial state of the world
+const canvas = Renderer.getRenderer().getCanvas();
+canvas.width = worldWidth;
+canvas.height = worldHeight;
 
-// Define the world
-const world = new World (new Vector2(gridCols, gridRows), cellSize);
-
-// Configure camera and scene
-const scene = new Scene();
-const camera = new OrthographicCamera(
-    -canvasSize.x / 2,   // left
-    canvasSize.x / 2,    // right
-    canvasSize.y / 2,    // top
-    -canvasSize.y / 2,   // bottom
-    1,                   // near clipping plane
-    1000                 // far clipping plane
-);
-camera.position.set(canvasSize.x / 2, canvasSize.y / 2, 10);
-
-// Setup the render and append to the DOM
-const renderer = new WebGLRenderer({ antialias: true });
-renderer.setSize(canvasSize.x, canvasSize.y);
-document.body.appendChild(renderer.domElement);
-
-// Add the camera to the scene
-scene.add(camera);
+const context = Renderer.getRenderer().getDrawingContext();
 
 
-// ======== SCENE SETUP ========
+// Define the target FPS and the time interval per frame
+const targetFPS = 60;
+const targetFrameInterval = 1000 / targetFPS;
 
-// Add every cell's mesh to the scene
-world.getCells().forEach((row) => {
-    row.forEach((cell) => {
-        scene.add(cell.getMeshContainer());
-    });
-});
+// Start the game loop
+let lastTime = performance.now();
+function gameLoop(time: number) {
+	const deltaTime = time - lastTime;
+	lastTime = time;
 
+    // Clear the canvas
+    context.clearRect(0, 0, canvas.width, canvas.height);
 
-// This is the primary "game loop"
-function animate() {
-	requestAnimationFrame(animate);
-	renderer.render(scene, camera);
+    // Draw a background
+    context.fillStyle = 'lightgray';
+    context.fillRect(0, 0, canvas.width, canvas.height);
 
-    // Lets rotate every cell randomly
-    world.getCells().forEach((row) => {
-        row.forEach((cell) => {
-            cell.getMeshContainer().rotation.x += 0.01;
-            cell.getMeshContainer().rotation.y += 0.01;
-        });
+	// Update the world
+	world.update();
+
+	// Draw the world
+	world.draw();
+
+	// Calculate the time to wait until the next frame
+	const timeToNextFrame = targetFrameInterval - (performance.now() - time);
+
+	// Use setTimeout to control the frame rate
+	if (timeToNextFrame > 0) {
+		setTimeout(() => {
+			requestAnimationFrame(gameLoop);
+		}, timeToNextFrame);
+	} else {
+		requestAnimationFrame(gameLoop);
+	}
+}
+
+// Start the game loop
+requestAnimationFrame(gameLoop);
+
+// Basic debugging stuff
+// !todo move this into some kind of UI class
+
+// setup an event listener on the generate sand button
+const generateSandButton = document.getElementById('control.generate_sand');
+if (generateSandButton) {
+    generateSandButton.addEventListener('click', () => {
+        generateRandomElements();
     });
 }
 
-// cout all the cell's world position
-world.getCells().forEach((row) => {
-    row.forEach((cell) => {
-        console.log(cell.getWorldPosition());
-    });
-});
-
-animate();
+function generateRandomElements() {
+    for (let i = 0; i < 100; i++) {
+        world.createRandomElement();
+    }
+}

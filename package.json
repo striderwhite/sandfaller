@@ -1,10 +1,8 @@
 {
   "dependencies": {
-    "normalize.css": "^8.0.1",
-    "three": "^0.155.0"
+    "normalize.css": "^8.0.1"
   },
   "devDependencies": {
-    "@types/three": "^0.155.1",
     "html-webpack-plugin": "^5.5.3",
     "ts-loader": "^9.4.4",
     "typescript": "^5.2.2",
