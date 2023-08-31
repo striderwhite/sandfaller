@@ -1,10 +1,12 @@
+import SandWorldElement from './main/elements/SandWorldElement';
+import Vector2 from './main/geometry/Vector2';
 import Renderer from './main/renderer/Renderer';
 import World from './main/world/World';
 
 // World constants
-const worldWidth = 500;
-const worldHeight = 500;
-const worldScale = 5;
+const worldWidth = 1200;
+const worldHeight = 800;
+const worldScale = 10;
 
 // Initial setup of the game world
 const world = new World(worldWidth, worldHeight, worldScale);
@@ -21,6 +23,14 @@ const context = Renderer.getRenderer().getDrawingContext();
 const targetFPS = 60;
 const targetFrameInterval = 1000 / targetFPS;
 
+// !========================================================================================
+// !todo move to UI class
+let mouseX: number;
+let mouseY: number;
+let mouseDown = false;
+// !========================================================================================
+
+
 // Start the game loop
 let lastTime = performance.now();
 function gameLoop(time: number) {
@@ -33,6 +43,13 @@ function gameLoop(time: number) {
     // Draw a background
     context.fillStyle = 'lightgray';
     context.fillRect(0, 0, canvas.width, canvas.height);
+
+	// !========================================================================================
+	// !todo move to UI class
+	if (mouseDown) {
+		makeSand(mouseX, mouseY);
+	}
+	// !========================================================================================
 
 	// Update the world
 	world.update();
@@ -56,9 +73,9 @@ function gameLoop(time: number) {
 // Start the game loop
 requestAnimationFrame(gameLoop);
 
-// Basic debugging stuff
-// !todo move this into some kind of UI class
 
+// !========================================================================================
+// !todo move this into some kind of UI class
 // setup an event listener on the generate sand button
 const generateSandButton = document.getElementById('control.generate_sand');
 if (generateSandButton) {
@@ -72,3 +89,35 @@ function generateRandomElements() {
         world.createRandomElement();
     }
 }
+
+// add event listener for current mouse position
+canvas.addEventListener('mousedown', (event) => {
+	mouseDown = true;
+	mouseX = Math.floor(event.offsetX / worldScale);
+	mouseY = Math.floor(event.offsetY / worldScale);
+});
+
+// add event listener for "mouse up"
+canvas.addEventListener('mouseup', () => {
+	mouseDown = false;
+});
+
+// add event listener for mouse movement
+
+canvas.addEventListener('mousemove', (event) => {
+	mouseX = Math.floor(event.offsetX / worldScale);
+	mouseY = Math.floor(event.offsetY / worldScale);
+});
+
+function makeSand(x: number, y: number) {
+	if (world.isEmptyAt(new Vector2(x, y))) {
+		world.addElementAtIndex(
+			new SandWorldElement(
+				world,
+				new Vector2(x, y)
+			),
+			x, y
+		);
+	}
+}
+// !========================================================================================
